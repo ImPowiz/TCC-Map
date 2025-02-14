@@ -225,7 +225,7 @@
                         const buildingDetails = `
                             Floors: ${feature.properties.numFloors || 'N/A'}
                             Building Number: ${feature.properties.buildingNumber || 'N/A'}
-                            URL: ${feature.properties.imageURL || 'N/A'}
+                            ${feature.properties.buildingDescription || ''}
                         `;
                         const imageURL = feature.properties.imageURL || 'default.jpg'; // Use default image if none provided
 
