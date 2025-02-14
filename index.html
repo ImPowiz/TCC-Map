@@ -127,7 +127,7 @@
 <body>
     <!-- Header with logo -->
     <div id="header">
-        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/55/Tacoma_Community_College_Logo.svg/1200px-Tacoma_Community_College_Logo.svg.png"
+        <img src="tccLogoNew.png"
             alt="Tacoma Community College Logo">
         <span style="color: white; font-size: 24px; font-weight: bold;">TCC Interactive Campus Map</span>
     </div>
@@ -150,7 +150,7 @@
         map.on('load', async () => {
             try {
                 // Fetch the GeoJSON data from the API
-                const response = await fetch('https://api.maptiler.com/data/ffd201f9-8403-4ce1-8054-520c11892184/features.json?key=1Syrv7Q37iQc6ndzvlXy');
+                const response = await fetch('TCC_Campus_Map.geojson');
 
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -220,7 +220,36 @@
                     resultItem.innerHTML = `
                         <div class="result-title">${buildingName}</div>
                         <div class="result-details">${buildingDetails}</div>
-                    `;
+                    `;geojsonData.features.forEach(feature => {
+                        const buildingName = feature.properties.buildingName || 'Unnamed Building';
+                        const buildingDetails = `
+                            Floors: ${feature.properties.numFloors || 'N/A'}
+                            Building Number: ${feature.properties.buildingNumber || 'N/A'}
+                            URL: ${feature.properties.imageURL || 'N/A'}
+                        `;
+                        const imageURL = feature.properties.imageURL || 'default.jpg'; // Use default image if none provided
+
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'result-item';
+                        resultItem.innerHTML = `
+                            <div class="result-title">${buildingName}</div>
+                            <div class="result-details">${buildingDetails}</div>
+                            <img src="${imageURL}" class="building-image" style="width: 100%; max-height: 200px; object-fit: cover; display: none; margin-top: 10px;">
+                        `;
+
+                        resultItem.onclick = () => {
+                            highlightFeature(feature);
+                            const [lng, lat] = feature.geometry.coordinates;
+                            map.flyTo({ center: [lng, lat], zoom: 18 });
+
+                            // Show the image when clicked
+                            const imgElement = resultItem.querySelector('.building-image');
+                            document.querySelectorAll('.building-image').forEach(img => img.style.display = 'none'); // Hide others
+                            imgElement.style.display = 'block';
+                        };
+
+                        campusDirectory.appendChild(resultItem);
+                    });
                     resultItem.onclick = () => {
                         // Highlight the selected feature
                         highlightFeature(feature);
